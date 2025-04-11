@@ -1,11 +1,47 @@
-# RTMS Audio Recording App
+# Audio to WAV Conversion Project
 
-This application captures real-time audio from Zoom meetings using the Real-Time Media Streaming (RTMS) API and saves it as WAV files. The app:
-- Listens to incoming webhook events
-- Manages WebSocket connections for signaling and media data
-- Captures audio data from meetings
-- Converts raw audio data to WAV format
-- Saves recordings for each meeting
+This project demonstrates how to capture real-time audio from Zoom meetings and convert it to WAV format using Zoom RTMS.
+
+## Implementation Details
+
+The application:
+1. Listens for `meeting.rtms_started` events
+2. Establishes WebSocket connections for signaling and media data
+3. Captures raw audio data from meetings
+4. Converts the raw audio data to WAV format using FFmpeg
+5. Saves the WAV files for each meeting
+
+## Running the Application
+
+1. Start the server:
+   ```bash
+   node rtms.js
+   ```
+
+2. Start a Zoom meeting. The application will:
+   - Receive the `meeting.rtms_started` event
+   - Establish WebSocket connections
+   - Begin capturing audio data
+   - Save the audio as a WAV file when the meeting ends
+
+3. The audio recordings will be saved in the current directory with the naming format:
+   ```
+   recording_[meeting_id].wav
+   ```
+
+## Project-Specific Features
+
+- Real-time audio capture
+- WAV format conversion
+- Meeting-based recording
+- Automatic cleanup of temporary files
+
+## Project-Specific Notes
+
+- Requires FFmpeg to be installed and accessible in your PATH
+- Audio is captured at 16kHz sample rate, mono channel
+- Temporary raw audio files are automatically cleaned up after conversion
+- Each meeting gets its own WAV file
 
 ## Prerequisites
 
@@ -84,24 +120,6 @@ The application uses FFmpeg to convert raw audio data to WAV format. Install FFm
    ZM_CLIENT_SECRET=your_client_secret
    ```
 
-## Running the Application
-
-1. Start the server:
-   ```bash
-   node rtms.js
-   ```
-
-2. Start a Zoom meeting. The application will:
-   - Receive the `meeting.rtms_started` event
-   - Establish WebSocket connections
-   - Begin capturing audio data
-   - Save the audio as a WAV file when the meeting ends
-
-3. The audio recordings will be saved in the current directory with the naming format:
-   ```
-   recording_[meeting_id].wav
-   ```
-
 ## Features
 
 - **Real-time Audio Capture**: Captures audio data from Zoom meetings in real-time
@@ -124,7 +142,3 @@ The application uses FFmpeg to convert raw audio data to WAV format. Install FFm
 3. **Audio Quality Issues**:
    - The application captures audio at 16kHz sample rate, mono channel
    - If audio quality is poor, check your network connection and Zoom meeting settings
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
