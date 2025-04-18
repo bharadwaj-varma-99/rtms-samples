@@ -112,6 +112,8 @@ function connectToSignalingWebSocket(meetingUuid, streamId, serverUrl) {
     });
 
     ws.on('message', (data) => {
+        // Print raw data first
+        console.log('Raw Signaling Data:', data.toString());
         const msg = JSON.parse(data);
         console.log('Signaling Message:', JSON.stringify(msg, null, 2));
 
@@ -181,7 +183,7 @@ function connectToMediaWebSocket(mediaUrl, meetingUuid, streamId, signalingSocke
         try {
             // Try to parse as JSON first
             const msg = JSON.parse(data.toString());
-            console.log('Media JSON Message:', JSON.stringify(msg, null, 2));
+            console.log('Media JSON Message:', data);
 
             // Handle successful media handshake
             if (msg.msg_type === 4 && msg.status_code === 0) { // DATA_HAND_SHAKE_RESP
@@ -206,7 +208,7 @@ function connectToMediaWebSocket(mediaUrl, meetingUuid, streamId, signalingSocke
             }
         } catch (err) {
             // If JSON parsing fails, it's binary audio data
-            console.log('Raw audio data (base64):', data.toString('base64'));
+            console.log('Raw audio data (hex):', data.toString('hex'));
         }
     });
 

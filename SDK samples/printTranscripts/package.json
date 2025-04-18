@@ -1,0 +1,10 @@
+{
+  "name": "print-transcripts",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "printTranscripts.js",
+  "dependencies": {
+    "@zoom/rtms": "github:zoom/rtms#main",
+    "dotenv": "^16.0.3"
+  }
+} 

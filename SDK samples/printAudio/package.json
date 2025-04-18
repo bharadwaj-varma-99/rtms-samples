@@ -1,0 +1,17 @@
+{
+  "name": "print-audio",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "printAudio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@zoom/rtms": "github:zoom/rtms",
+    "dotenv": "^16.5.0"
+  }
+}
