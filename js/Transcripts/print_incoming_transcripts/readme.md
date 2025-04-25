@@ -1,6 +1,6 @@
 # Transcript Processing Project
 
-This project demonstrates real-time transcript processing using the Zoom RTMS API. It focuses on capturing and processing meeting transcripts from Zoom meetings.
+This project demonstrates real-time transcript processing using the Zoom RTMS. It focuses on capturing and processing meeting transcripts from Zoom meetings.
 
 ## Implementation Details
 

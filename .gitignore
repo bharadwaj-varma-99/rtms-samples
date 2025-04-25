@@ -23,6 +23,8 @@ pids
 *.raw
 *.wav
 recording_*
+*.pcm
+*.raw.pcm
 
 # Build artifacts
 dist/
@@ -61,4 +63,22 @@ temp/
 
 # RTMS specific
 rtms-logs/
-*.raw.pcm 
+*.raw.pcm
+rtms-sdk/
+rtms-sdk-logs/
+rtms-sdk-cache/
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/ 

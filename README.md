@@ -1,87 +1,126 @@
-# Zoom RTMS Sample Projects
+# Zoom RTMS Samples Repository
 
-This repository contains sample projects demonstrating different use cases of the Zoom Real-Time Media Streaming (RTMS). The samples are organized into two main categories:
+This repository contains sample projects demonstrating how to work with Zoom's Real-Time Media Streams (RTMS) in JavaScript and Python. The samples are organized into two main categories: SDK-based implementations and native implementations.
 
-1. **Native Samples** - Direct implementation examples using raw RTMS API
-2. **SDK Samples** - Examples using the RTMS SDK for simplified integration
+## Repository Structure
 
-## Sample Categories
+```
+.
+├── js/
+│   ├── Audio/
+│   │   ├── save_audio_sdk/      # Save audio using RTMS SDK
+│   │   ├── print_audio_sdk/     # Print audio using RTMS SDK
+│   │   ├── save_audio/          # Save audio using native implementation
+│   │   └── print_audio/         # Print audio using native implementation
+│   └── Transcripts/
+│       ├── print_transcripts_sdk/    # Print transcripts using RTMS SDK
+│       └── print_incoming_transcripts/ # Print transcripts using native implementation
+└── Python/
+    ├── Audio/
+    │   ├── save_audio/          # Save audio using native implementation
+    │   └── print_incoming_audio/ # Print audio using native implementation
+    └── Transcripts/
+        └── print_incoming_transcripts/ # Print transcripts using native implementation
+```
 
-### Native Samples
-- **Audio** - Process raw audio streams from Zoom meetings
-- **Transcripts** - Access real-time transcription data
-- **Convert incoming audio to wav format** - Transform raw audio to WAV files
+## What is RTMS?
 
-### SDK Samples
-- **printAudio** - Display incoming audio data in console
-- **saveAudio** - Save meeting audio to disk
-- **printTranscripts** - Display real-time meeting transcripts
+Zoom Real-Time Media Streams (RTMS) allows developers to access real-time media data from Zoom meetings, including:
+- Audio streams
+- Video streams
+- Meeting transcripts
 
-## Prerequisites [Common Steps]
+## Implementation Approaches
 
-### 1. Setup ngrok
+### 1. SDK-Based Implementation
+The RTMS SDK provides a simplified way to integrate with RTMS by handling many low-level details automatically. Benefits include:
+- Simplified integration with just a few function calls
+- Automatic connection management
+- Built-in error handling and reconnection logic
+- Cross-platform compatibility
 
-Use ngrok or a similar tunneling software to expose your local port to the web.
+### 2. Native Implementation
+The native implementation gives you more control and customization options by working directly with RTMS. This approach requires:
+- Manual webhook event handling
+- Direct websocket connection management
+- Custom error handling
+- Raw data processing
 
-1. **Download ngrok**
-   - For MacOS: [ngrok for MacOS](https://ngrok.com/docs/getting-started/?os=macos)
-   - For Windows: [ngrok for Windows](https://ngrok.com/docs/getting-started/?os=windows)
-   - For Linux: [ngrok for Linux](https://ngrok.com/docs/getting-started/?os=linux)
+## Creating an App in the Zoom Marketplace
 
-2. **Sign up for an ngrok account** and copy your ngrok authtoken from your ngrok dashboard.
+To use these samples, you'll need to create an app in the Zoom Marketplace. Here's how:
 
-3. **Run the following command in your terminal:**
-   ```bash
-   ngrok config add-authtoken <TOKEN>
-   ```
+1. **Sign in to the Zoom Marketplace**:
+   - Go to https://marketplace.zoom.us/
+   - Sign in with your RTMS beta-enabled account
 
-4. **Expose your tunnel:**
-   ```bash
-   ngrok http http://localhost:3000
-   ```
+2. **Create a New App**:
+   - Select Develop → Build App → General App
+   - Click Create
+   - Select "User-Managed"
 
-### 2. Create an App with RTMS Scopes
+3. **Configure Basic Information**:
+   - [Optional] In the basic information section, provide your OAuth Redirect URL
+   - You can use the redirect URL generated from ngrok
 
-1. Navigate to [Zoom Marketplace](https://marketplace.zoom.us) and sign in with your RTMS beta-enabled account.
-2. Select `Develop` → `Build App` → `General App` and click `Create`.
-3. Select "User-Managed".
-4. [Optional] In the basic information section, provide your OAuth Redirect URL. You can use the redirect URL generated from ngrok.
-5. Navigate to `Features` → `Access` and enable Event Subscription.
-6. Provide a subscription name and Event Notification URL, and choose an Authentication Header Option.
-7. Select `Add Events`, search for "rtms", and select the RTMS Endpoints.
-8. Navigate to `Features` → `Surface` and select `Meetings`.
-9. [Optional] In the Home URL section, provide a URL to your app's home page and add it to the Domain allow list.
-10. In the In-Client App Features, enable the Zoom App SDK.
-11. [Optional] Click on `Add APIs` and add "startRTMS" and "stopRTMS" API permissions.
-12. Navigate to `Scopes` and select `Add Scopes`. Search for "rtms" and add the scopes for both "Meetings" and "Rtms".
-13. Navigate to `Add your app` → `Local Test` and select `Add App now`.
-14. Complete the Authorization Flow.
+4. **Configure Event Subscriptions**:
+   - Navigate to Features → Access
+   - Enable Event Subscription
+   - Provide a subscription name and Event Notification URL
+   - Choose an Authentication Header Option
+   - Select Add Events
+   - Search for "rtms" and select the RTMS Endpoints
 
-### 3. Install FFmpeg (Required for Audio Projects)
+5. **Configure Meeting Features**:
+   - Navigate to Features → Surface
+   - Select Meetings
+   - [Optional] In the Home URL section, provide a URL to your app's home page
+   - Add the URL to the Domain allow list
+   - In the In-Client App Features, enable the Zoom App SDK
+   - [Optional] Click on Add APIs and add "startRTMS" and "stopRTMS" API permissions
 
-The application uses FFmpeg to convert raw audio data to WAV format. Install FFmpeg based on your operating system:
+6. **Configure Scopes**:
+   - Navigate to Scopes
+   - Select Add Scopes
+   - Search for "rtms"
+   - Add the scopes for both "Meetings" and "Rtms"
 
-- **macOS**:
-  ```bash
-  brew install ffmpeg
-  ```
+7. **Complete Setup**:
+   - Navigate to Add your app → Local Test
+   - Select Add App now
+   - Complete the Authorization Flow
 
-- **Ubuntu/Debian**:
-  ```bash
-  sudo apt-get install ffmpeg
-  ```
+8. **Get Your Credentials**:
+   - After creating the app, you'll receive:
+     - Client ID
+     - Client Secret
+     - Webhook verification token
+   - Save these credentials securely - you'll need them for the samples
 
-- **Windows**:
-  Download from [FFmpeg website](https://ffmpeg.org/download.html) and add to PATH
+## Troubleshooting
 
+1. **Connection Issues**:
+   - Verify ngrok is running and the tunnel is active
+   - Check your Zoom OAuth credentials in the `.env` file
+   - Ensure your webhook URL is correctly configured
 
-## Support
+2. **SDK Installation Issues**:
+   - Make sure you have the correct token for fetching prebuilt binaries
+   - Check that you've installed the SDK correctly: `npm install github:zoom/rtms`
 
-For more information about RTMS and these sample projects, please refer to the individual project README files or visit the [Zoom Developer Documentation](https://marketplace.zoom.us/docs/guides/rtms/overview).
+3. **No Audio Data**:
+   - Verify that Auto-Start is enabled for your app in Zoom web settings
+   - Check that your app has the correct RTMS scopes
+   - Ensure you're properly handling the `meeting.rtms_started` webhook event
+
+4. **WAV Conversion Issues**:
+   - Verify FFmpeg is installed and accessible in your PATH
+   - RTMS sends uncompressed raw audio data (L16 PCM) at 16kHz sample rate, mono channel
+   - Use the correct FFmpeg parameters: `-f s16le -ar 16000 -ac 1`
 
 ## License
 
-MIT License
+This project is licensed under the MIT License.
 
 Copyright (c) 2025 Zoom Video Communications, Inc.
 
