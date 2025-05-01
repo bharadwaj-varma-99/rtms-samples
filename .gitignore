@@ -13,6 +13,11 @@ yarn-error.log*
 .env.test
 .env.production
 
+# Documentation
+dev-docs/
+dev-docs.json
+zoom-rtms-workflow.md
+
 # Runtime data
 pids
 *.pid

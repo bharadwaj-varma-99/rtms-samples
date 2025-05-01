@@ -1,64 +1,147 @@
 # Audio Processing Project
 
-This project demonstrates real-time audio processing using the Zoom RTMS API. It focuses on capturing and processing audio data from Zoom meetings.
+A Node.js implementation demonstrating Zoom's Real-Time Media Streams (RTMS) for capturing meeting audio data.
 
-## Prerequisites
+## Setup
 
-Before running the application, ensure you have the following environment variables set in a `.env` file:
-- `ZOOM_SECRET_TOKEN`: Secret token for URL validation
-- `ZM_CLIENT_ID`: Zoom client ID
-- `ZM_CLIENT_SECRET`: Zoom client secret
+Required env vars in `.env`:
+```
+ZOOM_SECRET_TOKEN=your_token
+ZM_CLIENT_ID=your_client_id
+ZM_CLIENT_SECRET=your_client_secret
+```
 
-## Implementation Details
+## RTMS Flow
 
-The application follows this sequence:
+### 1. Connection Establishment
+```javascript
+// 1. Zoom sends webhook with server URLs
+{
+    "event": "meeting.rtms_started",
+    "payload": {
+        "meeting_uuid": "uuid",
+        "rtms_stream_id": "stream_id", 
+        "server_urls": "wss://..."
+    }
+}
 
-1. Starts an Express server on port 3000
-2. Listens for webhook events at `/webhook` endpoint
-3. Handles URL validation challenges from Zoom
-4. When a meeting starts:
-   - Receives `meeting.rtms_started` event
-   - Establishes WebSocket connection to signaling server
-   - Sends handshake with authentication signature
-   - Receives media server URL from signaling server
-   - Establishes WebSocket connection to media server
-   - Sends media handshake with authentication
-   - Begins receiving audio data
-5. During the meeting:
-   - Maintains WebSocket connections with keep-alive messages
-   - Receives and logs raw audio data in hexadecimal format
-   - Handles any connection errors
-6. When a meeting ends:
-   - Receives `meeting.rtms_stopped` event
-   - Closes all active WebSocket connections
-   - Cleans up connection resources
+// 2. Connect to signaling server with auth
+const signature = HMAC_SHA256(`${clientId},${meetingUuid},${streamId}`, SECRET);
+{
+    msg_type: 1, // SIGNALING_HAND_SHAKE_REQ
+    meeting_uuid: meetingUuid,
+    rtms_stream_id: streamId,
+    signature: signature
+}
 
-## Running the Application
+// 3. Server responds with media endpoint
+{
+    msg_type: 2, // SIGNALING_HAND_SHAKE_RESP 
+    status_code: 0,
+    media_server: {
+        server_urls: {
+            all: "wss://media-server"
+        }
+    }
+}
 
-1. Start the server:
-   ```bash
-   node rtms.js
-   ```
+// 4. Connect to media server
+{
+    msg_type: 3, // DATA_HAND_SHAKE_REQ
+    meeting_uuid: meetingUuid,
+    rtms_stream_id: streamId,
+    signature: signature,
+    media_type: 1, // AUDIO
+    payload_encryption: false
+}
+```
 
-2. Start a Zoom meeting. The application will:
-   - Receive the `meeting.rtms_started` event
-   - Establish WebSocket connections
-   - Begin receiving audio data
-   - Output audio data in hexadecimal format to the terminal
+### 2. Data Flow
 
-## Project-Specific Features
+```javascript
+// Signaling Connection
+- Handles authentication & session management
+- Manages keep-alive (15s intervals)
+- Controls media stream state
 
-- Real-time audio data capture
-- WebSocket connection management for both signaling and media servers
-- Automatic connection cleanup on meeting end
-- Keep-alive message handling
-- Error handling for WebSocket connections
-- URL validation handling
+// Media Connection  
+- Receives raw audio packets
+- Format: 16kHz mono PCM
+- Data comes as binary WebSocket messages
+- Outputs as hex for debugging
+```
 
-## Project-Specific Notes
+### 3. Connection Management
 
-- The application processes audio data at 16kHz sample rate
-- Audio data is output in hexadecimal format
-- No file storage or conversion is performed
-- Server runs on port 3000
-- Webhook endpoint is available at `http://localhost:3000/webhook`
+```javascript
+// Track active connections per meeting
+const activeConnections = new Map();
+// Structure:
+{
+    [meetingUuid]: {
+        signaling: WebSocket,
+        media: WebSocket
+    }
+}
+
+// Cleanup on meeting end
+meeting.rtms_stopped -> close all sockets -> remove from map
+```
+
+## Message Types & Flow
+
+```
+Signaling Messages:
+1 -> SIGNALING_HAND_SHAKE_REQ  // Initial auth
+2 <- SIGNALING_HAND_SHAKE_RESP // Get media URL
+12 <- KEEP_ALIVE_REQ          // Every 15s
+13 -> KEEP_ALIVE_RESP         // Must respond
+
+Media Messages:
+3 -> DATA_HAND_SHAKE_REQ     // Media auth
+4 <- DATA_HAND_SHAKE_RESP    // Start streaming
+7 -> CLIENT_READY_ACK        // Ready for data
+<- Binary audio packets      // Raw PCM data
+```
+
+## Implementation Notes
+
+- Uses separate WebSocket connections for signaling and media
+- Signaling connection must stay alive for media flow
+- 3 failed keep-alives = connection termination
+- Audio data comes as raw PCM, displayed as hex
+- No persistent storage, just console output
+- Error handling focuses on connection recovery
+
+## Quick Start
+
+```bash
+node rtms.js
+# Server starts on 3000
+# Webhook endpoint: /webhook
+# Handles: url_validation, rtms_started, rtms_stopped
+```
+
+## Code Structure
+
+```javascript
+// Main components:
+1. Webhook Handler (/webhook)
+   - URL validation
+   - RTMS lifecycle events
+
+2. Signaling Connection
+   - Authentication
+   - Session management
+   - Keep-alive handling
+
+3. Media Connection
+   - Audio stream handling
+   - Binary data processing
+   - Connection monitoring
+
+4. Connection Management
+   - Meeting-based tracking
+   - Automatic cleanup
+   - Error recovery
+```
