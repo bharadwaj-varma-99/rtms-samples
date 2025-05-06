@@ -1,6 +1,7 @@
 # Zoom RTMS Samples Repository
 
 This repository contains sample projects demonstrating how to work with Zoom's Real-Time Media Streams (RTMS) in JavaScript, Python, and SDK implementations. 
+
 ## Repository Structure
 
 ```
@@ -13,9 +14,10 @@ This repository contains sample projects demonstrating how to work with Zoom's R
 │   ├── save_audio_js/         # Save audio using JavaScript implementation
 │   └── print_audio_js/        # Print audio using JavaScript implementation
 └── Transcripts/
-    ├── print_transcripts_sdk/       # Print transcripts using RTMS SDK
-    ├── print_incoming_transcripts/   # Print transcripts using native implementation
-    └── print_transcripts_python/     # Print transcripts using Python implementation
+    └── print_transcripts/
+        ├── print_transcripts_sdk/       # Print transcripts using RTMS SDK
+        ├── print_incoming_transcripts/   # Print transcripts using native implementation
+        └── print_transcripts_python/     # Print transcripts using Python implementation
 ```
 
 ## What is RTMS?
