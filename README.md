@@ -1,26 +1,21 @@
 # Zoom RTMS Samples Repository
 
-This repository contains sample projects demonstrating how to work with Zoom's Real-Time Media Streams (RTMS) in JavaScript and Python. The samples are organized into two main categories: SDK-based implementations and native implementations.
-
+This repository contains sample projects demonstrating how to work with Zoom's Real-Time Media Streams (RTMS) in JavaScript, Python, and SDK implementations. 
 ## Repository Structure
 
 ```
 .
-├── js/
-│   ├── Audio/
-│   │   ├── save_audio_sdk/      # Save audio using RTMS SDK
-│   │   ├── print_audio_sdk/     # Print audio using RTMS SDK
-│   │   ├── save_audio/          # Save audio using native implementation
-│   │   └── print_audio/         # Print audio using native implementation
-│   └── Transcripts/
-│       ├── print_transcripts_sdk/    # Print transcripts using RTMS SDK
-│       └── print_incoming_transcripts/ # Print transcripts using native implementation
-└── Python/
-    ├── Audio/
-    │   ├── save_audio/          # Save audio using native implementation
-    │   └── print_incoming_audio/ # Print audio using native implementation
-    └── Transcripts/
-        └── print_incoming_transcripts/ # Print transcripts using native implementation
+├── Audio/
+│   ├── save_audio_python/     # Save audio using Python implementation
+│   ├── print_audio_python/    # Print audio using Python implementation
+│   ├── save_audio_sdk/        # Save audio using RTMS SDK
+│   ├── print_audio_sdk/       # Print audio using RTMS SDK
+│   ├── save_audio_js/         # Save audio using JavaScript implementation
+│   └── print_audio_js/        # Print audio using JavaScript implementation
+└── Transcripts/
+    ├── print_transcripts_sdk/       # Print transcripts using RTMS SDK
+    ├── print_incoming_transcripts/   # Print transcripts using native implementation
+    └── print_transcripts_python/     # Print transcripts using Python implementation
 ```
 
 ## What is RTMS?
