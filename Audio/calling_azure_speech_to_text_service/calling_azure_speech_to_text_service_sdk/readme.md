@@ -1,16 +1,17 @@
-dreamtcs
 This project is based on https://github.com/zoom/rtms-developer-preview-js
 
-# Zoom RTMS real time speech-to-text service wuth audio stream
+# Zoom RTMS real time speech-to-text service with audio stream
 
 This project demonstrates the use of 3rd party speech-to-text service which accepts audio buffer as an input. The sample here utilize Microsoft Azure's speech-to-text service (Azure Speech service). Utilizing RTMS, it sends the audio buffer to Azure's API in real time, and prints out the transcribed text in the console log.
 
 ## Prerequisites
 
 Before running the application, ensure you have the following environment variables set in a `.env` file:
-- `ZOOM_SECRET_TOKEN`: Secret token for URL validation
-- `ZM_CLIENT_ID`: Zoom client ID
-- `ZM_CLIENT_SECRET`: Zoom client secret
+- `ZM_RTMS_CLIENT`: Your Zoom OAuth Client ID (required)
+- `ZM_RTMS_SECRET`:Your Zoom OAuth Client Secret (required)
+
+### Additional Environment Variables:
+- `PORT`: The port on which the server runs (default: 8080)
 - `AZURE_SPEECH_KEY`: Azure Speech Service key
 - `AZURE_REGION`: Region the Azure Speech Service is in
 
@@ -18,8 +19,9 @@ Before running the application, ensure you have the following environment variab
 
 The application follows this sequence:
 
-1. Starts an Express server on port 3000
-2. Listens for webhook events at `/webhook` endpoint
+
+1. Starts an server on port 8080
+2. Listens for webhook events at `/` endpoint
 3. Handles URL validation challenges from Zoom
 4. When a meeting starts:
    - Receives `meeting.rtms_started` event
@@ -43,7 +45,7 @@ The application follows this sequence:
 
 1. Start the server:
    ```bash
-   node index.js 
+   node index.js  
    ```
 
 2. Start a Zoom meeting. The application will: 
@@ -64,19 +66,16 @@ The application follows this sequence:
 
 - The application processes audio data at 16kHz sample rate, mono channel
 - API used is from Microsoft Azure
-- Server runs on port 3000
-- Webhook endpoint is available at `http://localhost:3000/webhook`
-- Requires FFmpeg to be installed and accessible in your PATH
+- Server runs on port 8080
+- Webhook endpoint is available at `http://localhost:PORT/`
 
-## Additional Setup Requirements 
+## Additional Setup Requirements  
 
 1. **Node.js** (v14 or higher recommended)
-2. **FFmpeg** installation:
-   - macOS: `brew install ffmpeg`
-   - Ubuntu/Debian: `sudo apt-get install ffmpeg`
-   - Windows: Download from [FFmpeg website](https://ffmpeg.org/download.html)
-3. **ngrok** for exposing your local server to the internet
+32. **ngrok** for exposing your local server to the Internet
 4. **Zoom App** configuration with RTMS scopes enabled
+
+## Troubleshooting  
 
 ## Troubleshooting  
 
@@ -95,8 +94,6 @@ The application follows this sequence:
    - The application captures audio at 16kHz sample rate, mono channel
    - If audio quality is poor, check your network connection and Zoom meeting settings
 
-
-dreamtcs
 ## Dependencies
 
 - `@zoom/rtms`: Zoom's Real-Time Media SDK

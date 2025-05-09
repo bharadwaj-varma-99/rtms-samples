@@ -1,4 +1,4 @@
-# Zoom RTMS real time speech-to-text service wuth audio stream
+# Zoom RTMS real time speech-to-text service with audio stream
 
 This project demonstrates the use of 3rd party speech-to-text service which accepts audio buffer as an input. The sample here utilize Microsoft Azure's speech-to-text service (Azure Speech service). Utilizing RTMS, it sends the audio buffer to Azure's API in real time, and prints out the transcribed text in the console log.
 
@@ -63,17 +63,12 @@ The application follows this sequence:
 - API used is from Microsoft Azure
 - Server runs on port 3000
 - Webhook endpoint is available at `http://localhost:3000/webhook`
-- Requires FFmpeg to be installed and accessible in your PATH
 
 ## Additional Setup Requirements 
 
 1. **Node.js** (v14 or higher recommended)
-2. **FFmpeg** installation:
-   - macOS: `brew install ffmpeg`
-   - Ubuntu/Debian: `sudo apt-get install ffmpeg`
-   - Windows: Download from [FFmpeg website](https://ffmpeg.org/download.html)
-3. **ngrok** for exposing your local server to the internet
-4. **Zoom App** configuration with RTMS scopes enabled
+2. **ngrok** for exposing your local server to the internet
+3. **Zoom App** configuration with RTMS scopes enabled
 
 ## Troubleshooting  
 

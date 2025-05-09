@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { saveRawVideo } from './saveRawVideo ./saveRawVideo.js';
+import { saveRawVideo } from './saveRawVideo.js';
 
 // Imnod in the RTMS SDK
 import rtms from "@zoom/rtms";
