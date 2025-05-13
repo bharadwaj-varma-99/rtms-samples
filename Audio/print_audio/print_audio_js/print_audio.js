@@ -19,6 +19,7 @@ app.use(express.json());
 // Map to keep track of active WebSocket connections
 const activeConnections = new Map();
 
+
 // Handle POST requests to the webhook endpoint
 app.post('/webhook', (req, res) => {
     console.log('RTMS Webhook received:', JSON.stringify(req.body, null, 2));
@@ -206,6 +207,15 @@ function connectToMediaWebSocket(mediaUrl, meetingUuid, streamId, signalingSocke
                 );
                 console.log('Responded to Media KEEP_ALIVE_REQ');
             }
+             // Handle audio data
+            if (msg.msg_type === 14 && msg.content && msg.content.data) {
+                // Convert Buffer to base64
+                const base64Data = msg.content.data.toString('base64');
+                
+                // Print the data in base64 format
+                console.log("Base64 data:", base64Data);
+            }
+
         } catch (err) {
             // If JSON parsing fails, it's binary audio data
             console.log('Raw audio data (hex):', data.toString('hex'));
