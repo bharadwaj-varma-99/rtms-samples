@@ -47,14 +47,12 @@ make
 #set library and path for AWS KVS plugin
 
 
-export GST_PLUGIN_PATH=/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build
-export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib:$LD_LIBRARY_PATH
+export GST_PLUGIN_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib:$LD_LIBRARY_PATH
 
-echo 'export GST_PLUGIN_PATH=/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib' >> ~/.bashrc
+echo 'export GST_PLUGIN_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib' >> ~/.bashrc
 source ~/.bashrc
-
-
 
 
 #verify if the kvs extension for gstreamer works
@@ -67,8 +65,8 @@ gst-launch-1.0 -v \
     x264enc tune=zerolatency bitrate=512 speed-preset=superfast ! h264parse ! \
     kvssink stream-name="TestStream" \
     aws-region="us-west-2" \
-    aws-access-key="AKIAEXAMPLEKEY" \
-    aws-secret-key="aSecretExampleKey12345" \
+    access-key="AKIAEXAMPLEKEY" \
+    secret-key="aSecretExampleKey12345" \
     storage-size=512
 
 

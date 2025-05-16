@@ -1,5 +1,8 @@
 
 
+process.env.GST_DEBUG = "2";
+process.env.GST_DEBUG_FILE = "/tmp/gstreamer.log";
+console.log("GStreamer debug logging enabled.");
 
 
 const { spawn } = require('child_process');
@@ -42,9 +45,12 @@ function startFFmpeg() {
         './output.mp4'                                                // Local file output
     ], { stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'] });
 
+
+
+    
     // Handle FFmpeg output
     ffmpegProcess.stdout.on('data', (data) => {
-        console.log('[FFmpeg] Muxed data received:', data.length);
+        //console.log('[FFmpeg] Muxed data received:', data.length);
         try {
             // Push merged data to GStreamer pipeline
             muxedStream.write(data);
@@ -94,18 +100,45 @@ try {
 
 
 
+// function sendVideoBuffer(buffer, timestamp) {
+//     try {
+//         // Directly use timestamp in milliseconds, clamped to the valid range
+//         const pts = BigInt(timestamp) % BigInt(4294967296);  // Clamp to 32-bit range
+//         const header = Buffer.alloc(8);
+//         header.writeUInt32BE(Number((pts >> BigInt(32)) & BigInt(0xFFFFFFFF)), 0);  // Upper 32 bits
+//         header.writeUInt32BE(Number(pts & BigInt(0xFFFFFFFF)), 4);  // Lower 32 bits
+
+//         const videoPacket = Buffer.concat([header, buffer]);
+//         videoStream.write(videoPacket);
+//         ffmpegProcess.stdio[4].write(videoPacket);  // Write video with timestamp to FFmpeg pipe
+//         //console.log(`[Video] Sent video buffer of size: ${buffer.length} with PTS: ${pts}`);
+//     } catch (err) {
+//         console.error('[Video] Error writing to FFmpeg:', err);
+//     }
+// }
+
+// function sendAudioBuffer(buffer, timestamp) {
+//     try {
+//         // Directly use timestamp in milliseconds, clamped to the valid range
+//         const pts = BigInt(timestamp) % BigInt(4294967296);  // Clamp to 32-bit range
+//         const header = Buffer.alloc(8);
+//         header.writeUInt32BE(Number((pts >> BigInt(32)) & BigInt(0xFFFFFFFF)), 0);  // Upper 32 bits
+//         header.writeUInt32BE(Number(pts & BigInt(0xFFFFFFFF)), 4);  // Lower 32 bits
+
+//         const audioPacket = Buffer.concat([header, buffer]);
+//         audioStream.write(audioPacket);
+//         ffmpegProcess.stdio[3].write(audioPacket);  // Write audio with timestamp to FFmpeg pipe
+//         ///console.log(`[Audio] Sent audio buffer of size: ${buffer.length} with PTS: ${pts}`);
+//     } catch (err) {
+//         console.error('[Audio] Error writing to FFmpeg:', err);
+//     }
+// }
+// Capture merged data from FFmpeg and send to GStreamer
 function sendVideoBuffer(buffer, timestamp) {
     try {
-        // Directly use timestamp in milliseconds, clamped to the valid range
-        const pts = BigInt(timestamp) % BigInt(4294967296);  // Clamp to 32-bit range
-        const header = Buffer.alloc(8);
-        header.writeUInt32BE(Number((pts >> BigInt(32)) & BigInt(0xFFFFFFFF)), 0);  // Upper 32 bits
-        header.writeUInt32BE(Number(pts & BigInt(0xFFFFFFFF)), 4);  // Lower 32 bits
-
-        const videoPacket = Buffer.concat([header, buffer]);
-        videoStream.write(videoPacket);
-        ffmpegProcess.stdio[4].write(videoPacket);  // Write video with timestamp to FFmpeg pipe
-        //console.log(`[Video] Sent video buffer of size: ${buffer.length} with PTS: ${pts}`);
+  
+        //videoStream.write(buffer);
+        ffmpegProcess.stdio[4].write(buffer);  
     } catch (err) {
         console.error('[Video] Error writing to FFmpeg:', err);
     }
@@ -113,27 +146,20 @@ function sendVideoBuffer(buffer, timestamp) {
 
 function sendAudioBuffer(buffer, timestamp) {
     try {
-        // Directly use timestamp in milliseconds, clamped to the valid range
-        const pts = BigInt(timestamp) % BigInt(4294967296);  // Clamp to 32-bit range
-        const header = Buffer.alloc(8);
-        header.writeUInt32BE(Number((pts >> BigInt(32)) & BigInt(0xFFFFFFFF)), 0);  // Upper 32 bits
-        header.writeUInt32BE(Number(pts & BigInt(0xFFFFFFFF)), 4);  // Lower 32 bits
-
-        const audioPacket = Buffer.concat([header, buffer]);
-        audioStream.write(audioPacket);
-        ffmpegProcess.stdio[3].write(audioPacket);  // Write audio with timestamp to FFmpeg pipe
-        ///console.log(`[Audio] Sent audio buffer of size: ${buffer.length} with PTS: ${pts}`);
+        //audioStream.write(buffer);
+        ffmpegProcess.stdio[3].write(buffer);  
     } catch (err) {
         console.error('[Audio] Error writing to FFmpeg:', err);
     }
 }
-// Capture merged data from FFmpeg and send to GStreamer
+
+
 
 muxedStream.on('data', (chunk) => {
     try {
         if (appsrc) {
             appsrc.push(chunk);
-            console.log(`[GStreamer] Sent merged chunk of size: ${chunk.length}`);
+            //console.log(`[GStreamer] Sent merged chunk of size: ${chunk.length}`);
         } else {
             console.error('[GStreamer] appsrc element not found.');
         }

@@ -7,9 +7,9 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 
 // Custom KVS GStreamer functions
-const { startStream,sendAudioBuffer, sendVideoBuffer } = require('./kvs_gstreamer_stream_video_only_with_ffmpeg.js');
+const { startStream,sendAudioBuffer, sendVideoBuffer } = require('./kvs_gstreamer_stream_audio_and_video_with_ffmpeg.js');
 
-startStream();
+
 // Load environment variables from a .env file
 dotenv.config();
 
