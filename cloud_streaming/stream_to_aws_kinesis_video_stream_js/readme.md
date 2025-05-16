@@ -1,12 +1,10 @@
 
-
-
-
 This sample uses gstreamer and amazon c++ library to send streams to Amazon KVS
 
 Here are some dependencies and compilation which needs to be done
+This guide assumes you are on Ubuntu environment
 
-#install gstreamer
+#install gstreamer via apt get
 
 sudo apt update
 sudo apt install -y \
@@ -27,18 +25,17 @@ sudo apt install -y \
 
 echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
 sudo apt update
-sudo apt install -y libssl1.1
+sudo apt install -y libssl1.1 ca-certificates
 
 
 #compile AWS KVS plugin for gstreamer
 
 
-
 cd ~
 git clone --recurse-submodules https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git
+
 cd amazon-kinesis-video-streams-producer-sdk-cpp
 git submodule update --init --recursive
-
 
 mkdir build
 cd build
@@ -50,18 +47,20 @@ make
 #set library and path for AWS KVS plugin
 
 
-export GST_PLUGIN_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build
-export LD_LIBRARY_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib
+export GST_PLUGIN_PATH=/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib:$LD_LIBRARY_PATH
 
-echo 'export GST_PLUGIN_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/build' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/home/username/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib' >> ~/.bashrc
+echo 'export GST_PLUGIN_PATH=/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/build/dependency/libkvscproducer/kvscproducer-src:/home/dreamtcs/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib' >> ~/.bashrc
 source ~/.bashrc
 
 
-#verify if it works
+
+
+#verify if the kvs extension for gstreamer works
 gst-inspect-1.0 kvssink
 
-
+#testing if the commandline interface works
 
 gst-launch-1.0 -v \
     videotestsrc is-live=true pattern=ball ! video/x-raw,width=1280,height=720,framerate=30/1 ! \
