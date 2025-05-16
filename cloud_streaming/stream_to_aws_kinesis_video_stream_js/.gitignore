@@ -48,3 +48,5 @@ recordings/*
 !recordings/.gitkeep
 
 scratchpad.md
+output.mp4
+debug_audio.pcm

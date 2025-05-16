@@ -61,6 +61,16 @@ source ~/.bashrc
 #verify if it works
 gst-inspect-1.0 kvssink
 
-#this runs on 
+
+
+gst-launch-1.0 -v \
+    videotestsrc is-live=true pattern=ball ! video/x-raw,width=1280,height=720,framerate=30/1 ! \
+    x264enc tune=zerolatency bitrate=512 speed-preset=superfast ! h264parse ! \
+    kvssink stream-name="TestStream" \
+    aws-region="us-west-2" \
+    aws-access-key="AKIAEXAMPLEKEY" \
+    aws-secret-key="aSecretExampleKey12345" \
+    storage-size=512
+
 
 
