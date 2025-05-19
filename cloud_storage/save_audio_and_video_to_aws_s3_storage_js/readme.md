@@ -1,6 +1,6 @@
 # Zoom RTMS Video and Audio save to AWS S3 Storage
 
-This project demonstrates real-time audio and video capture using the Zoom RTMS. It stores the raw audio and video local. Thereafter utilizes ffmpeg cli to combine (muxing), and converts it into a mp4 file format.
+This project demonstrates realtime audio and video capture using the Zoom RTMS. It stores the raw audio and video local. Thereafter utilizes ffmpeg cli to combine (muxing), and converts it into a mp4 file format.
 
 ## Prerequisites
 
@@ -60,8 +60,8 @@ The application follows this sequence:
 
 ## Project-Specific Features  
 
-- Real-time audio data capture (16kHz, mono)
-- Real-time video data capture (H264, 720p, 25fps)
+- Realtime audio data capture (16kHz, mono)
+- Realtime video data capture (H264, 720p, 25fps)
 - WebSocket connection management for both signaling and media servers
 - H264 & WAV muxing and conversion using FFmpeg
 - MeetingUuid based created folders

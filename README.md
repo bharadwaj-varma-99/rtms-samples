@@ -1,28 +1,54 @@
 # Zoom RTMS Samples Repository
 
-This repository contains sample projects demonstrating how to work with Zoom's Real-Time Media Streams (RTMS) in JavaScript, Python, and SDK implementations. 
+This repository contains sample projects demonstrating how to work with Zoom's Realtime Media Streams (RTMS) in JavaScript, Python, and SDK implementations. 
+
+> **Note on Terminology:** Throughout this repository, we standardize on using "Realtime" as a single word (not "Real-Time" or "real-time") for consistency. Some sample files may still use the hyphenated version, which will be updated in future releases.
 
 ## Repository Structure
 
 ```
 .
 ├── audio/
-│   ├── save_audio_python/     # Save audio using Python implementation
-│   ├── print_audio_python/    # Print audio using Python implementation
-│   ├── save_audio_sdk/        # Save audio using RTMS SDK
-│   ├── print_audio_sdk/       # Print audio using RTMS SDK
-│   ├── save_audio_js/         # Save audio using JavaScript implementation
-│   └── print_audio_js/        # Print audio using JavaScript implementation
-└── transcript/
-    └── print_transcripts/
-        ├── print_transcripts_sdk/       # Print transcripts using RTMS SDK
-        ├── print_incoming_transcripts/   # Print transcripts using native implementation
-        └── print_transcripts_python/     # Print transcripts using Python implementation
+│   ├── print_audio/
+│   ├── print_audio_js/                                        # Print audio using JavaScript
+│   ├── print_audio_python/                                    # Print audio using Python
+│   ├── print_audio_sdk/                                       # Print audio using SDK
+│   ├── save_audio/
+│   ├── save_audio_js/                                        # Save audio using JavaScript
+│   ├── save_audio_python/                                    # Save audio using Python
+│   ├── save_audio_sdk/                                       # Save audio using SDK
+│   ├── send_audio_to_assemblyai_transcribe_service_js/      # Transcribe using AssemblyAI
+│   ├── send_audio_to_aws_transcribe_service_js/             # Transcribe using AWS (JS)
+│   ├── send_audio_to_aws_transcribe_service_sdk/            # Transcribe using AWS (SDK)
+│   ├── send_audio_to_azure_speech_to_text_service_js/       # Transcribe using Azure (JS)
+│   ├── send_audio_to_azure_speech_to_text_service_sdk/      # Transcribe using Azure (SDK)
+│   └── send_audio_to_deepgram_transcribe_service_js/        # Transcribe using Deepgram
+├── cloud_streaming/
+│   └── stream_to_aws_kinesis_video_stream_js/               # Stream to AWS Kinesis
+├── cloud_storage/
+│   ├── save_audio_and_video_to_aws_s3_storage_js/          # Save to AWS S3
+│   └── save_audio_and_video_to_azure_blob_storage_js/       # Save to Azure Blob Storage
+├── live_streaming/
+│   ├── stream_audio_and_video_to_custom_frontend_js/        # Stream to custom frontend
+│   └── stream_audio_and_video_to_youtube_js/                # Stream to YouTube
+├── local_recording/
+│   ├── record_audio_and_video_to_local_storage_js/          # Basic local recording
+│   └── record_audio_and_video_to_local_storage_advance_js/  # Advanced local recording
+├── transcript/
+│   ├── print_incoming_transcripts_js/                       # Print transcripts using JavaScript
+│   ├── print_incoming_transcripts_python/                   # Print transcripts using Python
+│   ├── print_transcripts_sdk/                               # Print transcripts using SDK
+│   └── save_transcript_js/                                  # Save transcripts using JavaScript
+└── video/
+    ├── detect_object_using_tensorflow_js/                   # Object detection using TensorFlow (JS)
+    ├── detect_object_using_tensorflow_sdk/                  # Object detection using TensorFlow (SDK)
+    ├── save_video_js/                                       # Save video using JavaScript
+    └── save_video_sdk/                                      # Save video using SDK
 ```
 
 ## What is RTMS?
 
-Zoom Real-Time Media Streams (RTMS) allows developers to access real-time media data from Zoom meetings, including:
+Zoom Realtime Media Streams (RTMS) allows developers to access realtime media data from Zoom meetings, including:
 - Audio streams
 - Video streams
 - Meeting transcripts

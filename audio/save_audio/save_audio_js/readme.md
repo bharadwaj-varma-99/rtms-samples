@@ -1,6 +1,6 @@
-# Zoom RTMS realtime speech-to-text service with audio stream
+# Audio to WAV Conversion Project
 
-This project demonstrates the use of 3rd party speech-to-text service which accepts audio buffer as an input. The sample here utilize Microsoft Azure's speech-to-text service (Azure Speech service). Utilizing RTMS, it sends the audio buffer to Azure's API in realtime, and prints out the transcribed text in the console log.
+This project demonstrates real-time audio capture and conversion using the Zoom RTMS . It focuses on capturing audio data from Zoom meetings and converting it to WAV format.
 
 ## Prerequisites
 
@@ -8,8 +8,6 @@ Before running the application, ensure you have the following environment variab
 - `ZOOM_SECRET_TOKEN`: Secret token for URL validation
 - `ZM_CLIENT_ID`: Zoom client ID
 - `ZM_CLIENT_SECRET`: Zoom client secret
-- `AZURE_SPEECH_KEY`: Azure Speech Service key
-- `AZURE_REGION`: Region the Azure Speech Service is in
 
 ## Implementation Details
 
@@ -26,56 +24,66 @@ The application follows this sequence:
    - Establishes WebSocket connection to media server
    - Sends media handshake with authentication
    - Begins receiving audio data
-   - Sends audio data (as buffer) to Azure's Speech-to-Text Service
-   - Prints out the transribed text on the console
-5. During the meeting:  
+5. During the meeting:
    - Maintains WebSocket connections with keep-alive messages
    - Receives and stores raw audio data chunks
    - Handles any connection errors
-6. When a meeting ends:  
+6. When a meeting ends:
    - Receives `meeting.rtms_stopped` event
+   - Combines all audio chunks into a single buffer
+   - Converts raw audio data to WAV format using FFmpeg
+   - Saves the WAV file with meeting ID in the filename
+   - Cleans up temporary raw audio files
    - Closes all active WebSocket connections
 
 ## Running the Application
 
 1. Start the server:
    ```bash
-   node index.js 
+   node save_audio.js
    ```
 
-2. Start a Zoom meeting. The application will: 
+2. Start a Zoom meeting. The application will:
    - Receive the `meeting.rtms_started` event
    - Establish WebSocket connections
    - Begin capturing audio data
-   - Continuously send audio buffer to Azure Speech to Text Service, and prints out transribed text in console
+   - Save the audio as a WAV file when the meeting ends
 
 ## Project-Specific Features
 
-- Realtime audio data capture (16kHz, mono)
+- Real-time audio data capture (16kHz, mono)
 - WebSocket connection management for both signaling and media servers
+- Automatic WAV conversion using FFmpeg
+- Meeting-based recording with unique filenames
+- Automatic cleanup of temporary files
 - Keep-alive message handling
 - Error handling for WebSocket connections
 - URL validation handling
 
-## Project-Specific Notes 
+## Project-Specific Notes
 
 - The application processes audio data at 16kHz sample rate, mono channel
-- API used is from Microsoft Azure
+- Audio is converted to WAV format using FFmpeg
+- WAV files are saved with the naming format: `recording_[meeting_id].wav`
 - Server runs on port 3000
 - Webhook endpoint is available at `http://localhost:3000/webhook`
+- Requires FFmpeg to be installed and accessible in your PATH
 
-## Additional Setup Requirements 
+## Additional Setup Requirements
 
 1. **Node.js** (v14 or higher recommended)
-2. **ngrok** for exposing your local server to the internet
-3. **Zoom App** configuration with RTMS scopes enabled
+2. **FFmpeg** installation:
+   - macOS: `brew install ffmpeg`
+   - Ubuntu/Debian: `sudo apt-get install ffmpeg`
+   - Windows: Download from [FFmpeg website](https://ffmpeg.org/download.html)
+3. **ngrok** for exposing your local server to the internet
+4. **Zoom App** configuration with RTMS scopes enabled
 
-## Troubleshooting  
+## Troubleshooting
 
-1. **No transcribed logs printed out**:
-   - Check that you have a valid subscription service from Microsoft Azure Speech services.
+1. **No Audio Files Generated**:
+   - Verify FFmpeg is installed and accessible in your PATH
    - Check that the Zoom app has the correct RTMS scopes
-   - Check that you are requesting for the correct audio media_type and audio codec
    - Ensure the webhook URL is correctly configured in the Zoom app
 
 2. **Connection Issues**:

@@ -2,7 +2,7 @@ This project is based on https://github.com/zoom/rtms-developer-preview-js
 
 # Zoom RTMS Saving Raw Video Stream project
 
-This project demonstrates real-time video stream, capture and saving onto local storage using the Zoom RTMS . It focuses on capturing video data from Zoom meetings and saving it to the format received as-is. This sample uses the payload to subscribe to H264 video format.
+This project demonstrates realtime video stream, capture and saving onto local storage using the Zoom RTMS . It focuses on capturing video data from Zoom meetings and saving it to the format received as-is. This sample uses the payload to subscribe to H264 video format.
 
 ## Prerequisites
 
@@ -52,7 +52,7 @@ The application follows this sequence:
 
 ## Project-Specific Features  
 
-- Real-time video data capture (H264, HD, 25fps)
+- Realtime video data capture (H264, 720p HD, 25fps)
 - WebSocket connection management for both signaling and media servers
 - Meeting Uuid based folder creation and recording to unique filenames
 - Keep-alive message handling
