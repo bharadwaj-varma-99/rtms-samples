@@ -6,14 +6,14 @@ This repository contains sample projects demonstrating how to work with Zoom's R
 
 ```
 .
-├── Audio/
+├── audio/
 │   ├── save_audio_python/     # Save audio using Python implementation
 │   ├── print_audio_python/    # Print audio using Python implementation
 │   ├── save_audio_sdk/        # Save audio using RTMS SDK
 │   ├── print_audio_sdk/       # Print audio using RTMS SDK
 │   ├── save_audio_js/         # Save audio using JavaScript implementation
 │   └── print_audio_js/        # Print audio using JavaScript implementation
-└── Transcripts/
+└── transcript/
     └── print_transcripts/
         ├── print_transcripts_sdk/       # Print transcripts using RTMS SDK
         ├── print_incoming_transcripts/   # Print transcripts using native implementation
