@@ -32,9 +32,9 @@ app.use(express.json());
 // Map to keep track of active WebSocket connections and audio chunks
 const activeConnections = new Map();
 
-//dreamtcs this is /webhook
+
 // Handle POST requests to the webhook endpoint
-app.post('/', async (req, res) => {
+app.post('/webhook', async (req, res) => {
     console.log('RTMS Webhook received:', JSON.stringify(req.body, null, 2));
     const { event, payload } = req.body;
 

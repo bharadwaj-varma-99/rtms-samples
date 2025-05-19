@@ -2,12 +2,13 @@ import express from 'express';
 import crypto from 'crypto';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
+import { buffer } from 'stream/consumers';
 
 // Load environment variables from a .env file
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = 3000; 
 
 const ZOOM_SECRET_TOKEN = process.env.ZOOM_SECRET_TOKEN;
 const CLIENT_ID = process.env.ZM_CLIENT_ID;
@@ -209,8 +210,14 @@ function connectToMediaWebSocket(mediaUrl, meetingUuid, streamId, signalingSocke
             }
              // Handle audio data
             if (msg.msg_type === 14 && msg.content && msg.content.data) {
-                // Convert Buffer to base64
+
                 const base64Data = msg.content.data.toString('base64');
+                
+                // Convert the timestamp to a human-readable date
+                const readableTimestamp = new Date(msg.content.timestamp).toLocaleString();
+
+                // Print the timestamp
+                console.log("Timestamp (Human-Readable):", readableTimestamp);
                 
                 // Print the data in base64 format
                 console.log("Base64 data:", base64Data);
@@ -239,3 +246,6 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
     console.log(`Webhook endpoint available at http://localhost:${port}/webhook`);
 });
+
+
+
