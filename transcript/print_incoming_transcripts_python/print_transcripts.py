@@ -5,6 +5,7 @@ import hashlib
 import asyncio
 import websockets
 import uvicorn
+import ssl
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 
@@ -102,8 +103,12 @@ async def connect_to_media_websocket(media_url, meeting_uuid, stream_id, signali
     """Connect to the media WebSocket server."""
     print(f"Connecting to media WebSocket at {media_url}")
 
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
     try:
-        async with websockets.connect(media_url, ssl=False) as media_ws:
+        async with websockets.connect(media_url, ssl=ssl_context) as media_ws:
             # Store connection for cleanup later
             if meeting_uuid in active_connections:
                 active_connections[meeting_uuid]["media"] = media_ws
