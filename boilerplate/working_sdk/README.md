@@ -69,6 +69,7 @@ client.setAudioParameters({
 
 ### Video Parameters
 
+
 ```javascript
 client.setVideoParameters({
   contentType: rtms.VideoContentType.RAW_VIDEO,
