@@ -3,222 +3,180 @@ import json
 import hmac
 import hashlib
 import asyncio
-import websockets
-import uvicorn
 import ssl
 from fastapi import FastAPI, Request
+from aiohttp import ClientSession, TCPConnector, WSMsgType
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
 app = FastAPI()
 
-port_str = os.getenv("PORT", "3000")  # Default to 8000 if PORT is not set
-
-try:
-    APP_PORT = int(port_str)
-except ValueError:
-    raise ValueError(f"Invalid port number: {port_str}")
-
-WEBHOOK_PATH =os.getenv("WEBHOOK_PATH")
+APP_PORT = int(os.getenv("PORT", "3000"))
+WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/webhook")
 ZOOM_SECRET_TOKEN = os.getenv("ZOOM_SECRET_TOKEN")
 CLIENT_ID = os.getenv("ZM_CLIENT_ID")
 CLIENT_SECRET = os.getenv("ZM_CLIENT_SECRET")
 
-# Dictionary to keep track of active WebSocket connections
 active_connections = {}
 
 def generate_signature(client_id, meeting_uuid, stream_id, client_secret):
-    """Generate signature for authentication."""
-    print('Generating signature with parameters:')
-    print('meetingUuid:', meeting_uuid)
-    print('streamId:', stream_id)
-
-    # Create a message string and generate an HMAC SHA256 signature
     message = f"{client_id},{meeting_uuid},{stream_id}"
     return hmac.new(
-        client_secret.encode(),
-        message.encode(),
-        hashlib.sha256
+        client_secret.encode(), message.encode(), hashlib.sha256
     ).hexdigest()
 
 async def connect_to_signaling_websocket(meeting_uuid, stream_id, server_url):
-    """Connect to the signaling WebSocket server."""
-    print(f"Connecting to signaling WebSocket for meeting {meeting_uuid}")
+    print(f"Connecting to signaling WebSocket: {server_url}")
+    ssl_context = ssl._create_unverified_context()
 
-    try:
-        async with websockets.connect(server_url) as ws:
-            # Store connection for cleanup later
-            if meeting_uuid not in active_connections:
-                active_connections[meeting_uuid] = {}
-            active_connections[meeting_uuid]["signaling"] = ws
+    async with ClientSession(connector=TCPConnector(ssl=False)) as session:
+        async with session.ws_connect(server_url, ssl=ssl_context) as ws:
+            active_connections.setdefault(meeting_uuid, {})["signaling"] = ws
 
-            print(f"Signaling WebSocket connection opened for meeting {meeting_uuid}")
             signature = generate_signature(CLIENT_ID, meeting_uuid, stream_id, CLIENT_SECRET)
-
-            # Send handshake message
             handshake = {
-                "msg_type": 1,  # SIGNALING_HAND_SHAKE_REQ
+                "msg_type": 1,
                 "protocol_version": 1,
                 "meeting_uuid": meeting_uuid,
                 "rtms_stream_id": stream_id,
                 "sequence": int(asyncio.get_event_loop().time() * 1e9),
                 "signature": signature
             }
-            await ws.send(json.dumps(handshake))
-            print("Sent handshake to signaling server")
 
-            while True:
-                try:
-                    data = await ws.recv()
-                    msg = json.loads(data)
-                    print("Signaling Message:", json.dumps(msg, indent=2))
+            await ws.send_json(handshake)
+            print("Handshake sent to signaling server")
 
-                    # Handle successful handshake response
-                    if msg["msg_type"] == 2 and msg["status_code"] == 0:  # SIGNALING_HAND_SHAKE_RESP
-                        media_url = msg.get("media_server", {}).get("server_urls", {}).get("all")
-                        if media_url:
-                            # Connect to the media WebSocket server
-                            asyncio.create_task(
-                                connect_to_media_websocket(media_url, meeting_uuid, stream_id, ws)
-                            )
-
-                    # Respond to keep-alive requests
-                    if msg["msg_type"] == 12:  # KEEP_ALIVE_REQ
-                        keep_alive_response = {
-                            "msg_type": 13,  # KEEP_ALIVE_RESP
-                            "timestamp": msg["timestamp"]
-                        }
-                        print("Responding to Signaling KEEP_ALIVE_REQ:", keep_alive_response)
-                        await ws.send(json.dumps(keep_alive_response))
-
-                except websockets.exceptions.ConnectionClosed:
-                    break
-                except Exception as e:
-                    print(f"Error processing message: {e}")
-                    break
-
-    except Exception as e:
-        print(f"Signaling socket error: {e}")
-    finally:
-        print("Signaling socket closed")
-        if meeting_uuid in active_connections:
-            active_connections[meeting_uuid].pop("signaling", None)
-
-async def connect_to_media_websocket(media_url, meeting_uuid, stream_id, signaling_socket):
-    """Connect to the media WebSocket server."""
-    print(f"Connecting to media WebSocket at {media_url}")
-
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
-    try:
-        async with websockets.connect(media_url, ssl=ssl_context) as media_ws:
-            # Store connection for cleanup later
-            if meeting_uuid in active_connections:
-                active_connections[meeting_uuid]["media"] = media_ws
-
-            signature = generate_signature(CLIENT_ID, meeting_uuid, stream_id, CLIENT_SECRET)
-            handshake = {
-                "msg_type": 3,  # DATA_HAND_SHAKE_REQ
-                "protocol_version": 1,
-                "meeting_uuid": meeting_uuid,
-                "rtms_stream_id": stream_id,
-                "signature": signature,
-                "media_type": 1,  # MEDIA_DATA_AUDIO
-                "payload_encryption": False
-            }
-            await media_ws.send(json.dumps(handshake))
-
-            while True:
-                try:
-                    data = await media_ws.recv()
+            async for msg in ws:
+                if msg.type == WSMsgType.TEXT:
                     try:
-                        # Try to parse as JSON first
-                        msg = json.loads(data)
-                        print("Media JSON Message:", json.dumps(msg, indent=2))
+                        data = json.loads(msg.data)
+                        print("Signaling message:", json.dumps(data, indent=2))
 
-                        # Handle successful media handshake
-                        if msg["msg_type"] == 4 and msg["status_code"] == 0:  # DATA_HAND_SHAKE_RESP
-                            await signaling_socket.send(json.dumps({
-                                "msg_type": 7,  # CLIENT_READY_ACK
-                                "rtms_stream_id": stream_id
-                            }))
-                            print("Media handshake successful, sent start streaming request")
+                        if data["msg_type"] == 2 and data["status_code"] == 0:
+                            media_url = data.get("media_server", {}).get("server_urls", {}).get("all")
+                            if media_url:
+                                asyncio.create_task(
+                                    connect_to_media_websocket(media_url, meeting_uuid, stream_id, session, ws)
+                                )
 
-                        # Respond to keep-alive requests
-                        if msg["msg_type"] == 12:  # KEEP_ALIVE_REQ
-                            await media_ws.send(json.dumps({
-                                "msg_type": 13,  # KEEP_ALIVE_RESP
-                                "timestamp": msg["timestamp"]
-                            }))
-                            print("Responded to Media KEEP_ALIVE_REQ")
+                        elif data["msg_type"] == 12:
+                            await ws.send_json({
+                                "msg_type": 13,
+                                "timestamp": data["timestamp"]
+                            })
+                            print("Signaling KEEP_ALIVE_RESP sent")
 
-                    except json.JSONDecodeError:
-                        # If JSON parsing fails, it's binary audio data
-                        print("Raw audio data (base64):", data.hex())
+                    except Exception as e:
+                        print(f"Error parsing signaling message: {e}")
 
-                except websockets.exceptions.ConnectionClosed:
+                elif msg.type == WSMsgType.CLOSED:
                     break
-                except Exception as e:
-                    print(f"Error processing message: {e}")
+                elif msg.type == WSMsgType.ERROR:
+                    print("WebSocket error:", msg.data)
                     break
 
-    except Exception as e:
-        print(f"Media socket error: {e}")
-    finally:
-        print("Media socket closed")
-        if meeting_uuid in active_connections:
-            active_connections[meeting_uuid].pop("media", None)
+async def connect_to_media_websocket(media_url, meeting_uuid, stream_id, session, signaling_ws):
+    print(f"Connecting to media WebSocket: {media_url}")
+    ssl_context = ssl._create_unverified_context()
+
+    async with session.ws_connect(media_url, ssl=ssl_context) as ws:
+        active_connections.setdefault(meeting_uuid, {})["media"] = ws
+
+        signature = generate_signature(CLIENT_ID, meeting_uuid, stream_id, CLIENT_SECRET)
+        handshake = {
+            "msg_type": 3,
+            "protocol_version": 1,
+            "meeting_uuid": meeting_uuid,
+            "rtms_stream_id": stream_id,
+            "signature": signature,
+            "media_type": 32,
+            "payload_encryption": False,
+            "media_params": {
+                "audio": {
+                    "content_type": 1,
+                    "sample_rate": 1,
+                    "channel": 1,
+                    "codec": 1,
+                    "data_opt": 1,
+                    "send_rate": 100
+                },
+                "video": {
+                    "codec": 7,
+                    "resolution": 2,
+                    "fps": 25
+                }
+            }
+        }
+
+        await ws.send_json(handshake)
+        print("Media handshake sent")
+
+        async for msg in ws:
+            if msg.type == WSMsgType.TEXT:
+                try:
+                    data = json.loads(msg.data)
+                    print("Media message:", json.dumps(data, indent=2))
+
+                    if data["msg_type"] == 4 and data["status_code"] == 0:
+                        await signaling_ws.send_json({
+                            "msg_type": 7,
+                            "rtms_stream_id": stream_id
+                        })
+                        print("CLIENT_READY_ACK sent")
+
+                    elif data["msg_type"] == 12:
+                        await ws.send_json({
+                            "msg_type": 13,
+                            "timestamp": data["timestamp"]
+                        })
+                        print("Media KEEP_ALIVE_RESP sent")
+
+                except json.JSONDecodeError:
+                    print("Binary or malformed data received")
+
+            elif msg.type == WSMsgType.BINARY:
+                print("Binary data received (audio/video)")
+
+            elif msg.type == WSMsgType.CLOSED or msg.type == WSMsgType.ERROR:
+                print("Media WebSocket closed")
+                break
 
 @app.post(WEBHOOK_PATH)
 async def webhook(request: Request):
-    """Handle webhook requests."""
     body = await request.json()
     print("RTMS Webhook received:", json.dumps(body, indent=2))
+
     event = body.get("event")
     payload = body.get("payload", {})
 
-    # Handle URL validation event
     if event == "endpoint.url_validation" and payload.get("plainToken"):
-        hash_obj = hmac.new(
-            ZOOM_SECRET_TOKEN.encode(),
-            payload["plainToken"].encode(),
-            hashlib.sha256
-        )
-        print("Responding to URL validation challenge")
-        return {
-            "plainToken": payload["plainToken"],
-            "encryptedToken": hash_obj.hexdigest()
-        }
+        token = payload["plainToken"]
+        encrypted_token = hmac.new(
+            ZOOM_SECRET_TOKEN.encode(), token.encode(), hashlib.sha256
+        ).hexdigest()
+        return {"plainToken": token, "encryptedToken": encrypted_token}
 
-    # Handle RTMS started event
-    if event == "meeting.rtms_started":
-        print("RTMS Started event received")
+    elif event == "meeting.rtms_started":
+        print("RTMS started")
         meeting_uuid = payload.get("meeting_uuid")
-        rtms_stream_id = payload.get("rtms_stream_id")
-        server_urls = payload.get("server_urls")
-        if all([meeting_uuid, rtms_stream_id, server_urls]):
-            asyncio.create_task(
-                connect_to_signaling_websocket(meeting_uuid, rtms_stream_id, server_urls)
-            )
+        stream_id = payload.get("rtms_stream_id")
+        server_url = payload.get("server_urls")
+        if all([meeting_uuid, stream_id, server_url]):
+            asyncio.create_task(connect_to_signaling_websocket(meeting_uuid, stream_id, server_url))
 
-    # Handle RTMS stopped event
-    if event == "meeting.rtms_stopped":
-        print("RTMS Stopped event received")
+    elif event == "meeting.rtms_stopped":
+        print("RTMS stopped")
         meeting_uuid = payload.get("meeting_uuid")
         if meeting_uuid in active_connections:
-            connections = active_connections[meeting_uuid]
-            for conn in connections.values():
-                if conn and hasattr(conn, "close"):
-                    await conn.close()
+            for conn in active_connections[meeting_uuid].values():
+                await conn.close()
             active_connections.pop(meeting_uuid, None)
 
     return {"status": "ok"}
 
 if __name__ == "__main__":
+    import uvicorn
     print(f"Server running at http://localhost:{APP_PORT}")
-    print(f"Webhook endpoint available at http://localhost:{APP_PORT}"+WEBHOOK_PATH)
-    uvicorn.run(app, host="0.0.0.0", port=APP_PORT) 
+    print(f"Webhook endpoint available at http://localhost:{APP_PORT}{WEBHOOK_PATH}")
+    uvicorn.run(app, host="0.0.0.0", port=APP_PORT)
