@@ -28,8 +28,10 @@ temp/
 processed/
 
 # Logs
+
 *.log
-logs/
+!logs/.gitkeep
+debug.log
 debug.log
 
 # Optional npm cache directory
